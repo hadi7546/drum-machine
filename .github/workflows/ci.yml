@@ -78,7 +78,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install meson ninja
           pip install -r requirements.txt
-          pip install git+https://github.com/jwestman/blueprint-compiler.git
+          pip install git+https://gitlab.gnome.org/GNOME/blueprint-compiler.git
           brew install desktop-file-utils
       - name: Run build script
         run: |
