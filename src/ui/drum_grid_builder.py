@@ -32,6 +32,9 @@ class DrumGridBuilder:
         self.window = window
         self.main_container = None
         self.drum_parts_column = None
+        self.is_dragging = False
+        self.current_drag_row = None
+        self.last_toggled_beat = None
 
     @property
     def beats_per_page(self):
@@ -381,6 +384,18 @@ class DrumGridBuilder:
         )
         beat_toggle.add_controller(right_click_gesture)
 
+        # Add press/release controllers for drag functionality
+        press_gesture = Gtk.GestureClick.new()
+        press_gesture.set_button(Gdk.BUTTON_PRIMARY)
+        press_gesture.connect("pressed", self._on_button_pressed, drum_part, global_beat_index)
+        press_gesture.connect("released", self._on_button_released, drum_part, global_beat_index)
+        beat_toggle.add_controller(press_gesture)
+
+        # Add motion controller for hover detection during drag
+        motion_controller = Gtk.EventControllerMotion.new()
+        motion_controller.connect("enter", self._on_motion_enter, drum_part, global_beat_index)
+        beat_toggle.add_controller(motion_controller)
+
         setattr(self.window, f"{drum_part}_toggle_{global_beat_index}", beat_toggle)
         return beat_toggle
 
@@ -389,3 +404,23 @@ class DrumGridBuilder:
         if self.drum_parts_column:
             new_spacing = 12 if is_compact else 10
             self.drum_parts_column.set_spacing(new_spacing)
+
+    def _on_button_pressed(self, gesture, n_press, x, y, drum_part, beat_index):
+        """Handle button press event - start drag mode"""
+        self.is_dragging = True
+        self.current_drag_row = drum_part
+        self.last_toggled_beat = beat_index
+
+    def _on_button_released(self, gesture, n_press, x, y, drum_part, beat_index):
+        """Handle button release event - end drag mode"""
+        self.is_dragging = False
+        self.current_drag_row = None
+        self.last_toggled_beat = None
+
+    def _on_motion_enter(self, controller, x, y, drum_part, beat_index):
+        """Handle motion enter event for hover detection during drag"""
+        if self.is_dragging and self.current_drag_row == drum_part:
+            if beat_index != self.last_toggled_beat:
+                toggle_button = getattr(self.window, f"{drum_part}_toggle_{beat_index}")
+                toggle_button.set_active(not toggle_button.get_active())
+                self.last_toggled_beat = beat_index
