@@ -79,6 +79,7 @@ jobs:
           pip install meson ninja
           pip install -r requirements.txt
           brew install blueprint-compiler
+          brew install desktop-file-utils
       - name: Run build script
         run: |
           chmod +x scripts/build-macos.sh
