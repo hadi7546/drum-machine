@@ -55,7 +55,65 @@ Drum Machine is a modern and intuitive application for creating, playing, and ma
 
 ### Build from source
 
-You can clone and run from GNOME Builder.
+You can clone and run from GNOME Builder, or build manually using the provided build system.
+
+#### Quick Start
+
+```bash
+# Install dependencies
+make install-deps
+
+# Build for your current platform
+make
+
+# Or build for specific platforms
+make windows      # Windows (x64)
+make windows32    # Windows (x86)
+make macos        # macOS
+make flatpak      # Linux Flatpak
+```
+
+#### Advanced Build Options
+
+The project includes comprehensive build scripts for cross-platform development:
+
+```bash
+# Use the universal build script
+./scripts/build.sh --windows     # Build for Windows x64
+./scripts/build.sh --windows32   # Build for Windows x86
+./scripts/build.sh --macos       # Build for macOS
+./scripts/build.sh --flatpak     # Build for Linux Flatpak
+```
+
+#### Dependencies
+
+**Development dependencies:**
+- Python 3.12+
+- Meson build system
+- Ninja build tool
+- GTK4 development libraries
+- Blueprint compiler
+
+**Runtime dependencies:**
+- Python packages (see requirements.txt)
+- GStreamer
+- GTK4 runtime
+- Audio libraries
+
+#### GitHub Actions
+
+The project includes automated CI/CD with:
+- Multi-platform builds (Linux, Windows, macOS)
+- Artifact uploads for each platform
+- Automated release creation (manual trigger)
+- Code linting and testing
+
+To create a release:
+1. Go to the Actions tab in GitHub
+2. Select "Build and Lint" workflow
+3. Click "Run workflow"
+4. Check "Create a release with built artifacts"
+5. Click "Run workflow"
 
 ## Contribute
 We need your help to make Drum Machine better!

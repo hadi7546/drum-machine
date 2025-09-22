@@ -3,8 +3,14 @@ name: Build and Lint
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: "Create a release with built artifacts"
+        required: false
+        type: boolean
 
 jobs:
   lint:
@@ -16,7 +22,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -42,16 +48,21 @@ jobs:
           manifest-path: "io.github.revisto.drum-machine.json"
           run-tests: "true"
           cache-key: flatpak-builder-${{ github.sha }}
+      - name: Upload Flatpak artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: drum-machine-flatpak
+          path: "*.flatpak"
 
   windows-build:
-    name: Windows Cross-Build
+    name: Windows Cross-Build (x64)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -63,6 +74,37 @@ jobs:
         run: |
           chmod +x scripts/build-windows.sh
           ./scripts/build-windows.sh
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drum-machine-windows-x64
+          path: dist/
+
+  windows32-build:
+    name: Windows Cross-Build (x86)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install meson ninja
+          pip install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y mingw-w64 blueprint-compiler gcc-mingw-w64-i686
+      - name: Run 32-bit build script
+        run: |
+          chmod +x scripts/build-windows.sh
+          ./scripts/build-windows.sh
+      - name: Upload Windows 32-bit artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drum-machine-windows-x86
+          path: dist/
 
   macos-build:
     name: macOS Build
@@ -72,7 +114,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.12"
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -84,3 +126,39 @@ jobs:
         run: |
           chmod +x scripts/build-macos.sh
           ./scripts/build-macos.sh
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: drum-machine-macos
+          path: dist/
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [lint, flatpak, windows-build, windows32-build, macos-build]
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.create_release == 'true'
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number }}
+          release_name: Release ${{ github.run_number }}
+          body: |
+            Automated release build.
+
+            ## Downloads
+            - **Linux (Flatpak)**: Available in artifacts
+            - **Windows x64**: Available in artifacts
+            - **Windows x86**: Available in artifacts
+            - **macOS**: Available in artifacts
+
+            ## Installation
+            See the README for installation instructions.
+          draft: false
+          prerelease: false

@@ -1,0 +1,36 @@
+[binaries]
+c = 'i686-w64-mingw32-gcc'
+cpp = 'i686-w64-mingw32-g++'
+ar = 'i686-w64-mingw32-ar'
+strip = 'i686-w64-mingw32-strip'
+pkgconfig = 'i686-w64-mingw32-pkg-config'
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86'
+cpu = 'i686'
+endian = 'little'
+
+[properties]
+# Python installation for Windows
+python_installation = '/usr/i686-w64-mingw32'
+
+# GTK and other dependencies
+gtk3_prefix = '/usr/i686-w64-mingw32'
+glib_prefix = '/usr/i686-w64-mingw32'
+gobject_prefix = '/usr/i686-w64-mingw32'
+
+[built-in options]
+c_args = ['-D_GNU_SOURCE']
+cpp_args = ['-D_GNU_SOURCE']
+
+# Disable some features that might not work in cross-compilation
+buildtype = 'release'
+strip = true
+b_ndebug = 'if-release'
+
+# Python module configuration
+python_path = '/usr/i686-w64-mingw32/bin/python3'
+
+# pkg-config paths
+pkg_config_libdir = ['/usr/i686-w64-mingw32/lib/pkgconfig', '/usr/i686-w64-mingw32/share/pkgconfig']

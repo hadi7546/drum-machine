@@ -10,3 +10,27 @@ system = 'windows'
 cpu_family = 'x86_64'
 cpu = 'x86_64'
 endian = 'little'
+
+[properties]
+# Python installation for Windows
+python_installation = '/usr/x86_64-w64-mingw32'
+
+# GTK and other dependencies
+gtk3_prefix = '/usr/x86_64-w64-mingw32'
+glib_prefix = '/usr/x86_64-w64-mingw32'
+gobject_prefix = '/usr/x86_64-w64-mingw32'
+
+[built-in options]
+c_args = ['-D_GNU_SOURCE']
+cpp_args = ['-D_GNU_SOURCE']
+
+# Disable some features that might not work in cross-compilation
+buildtype = 'release'
+strip = true
+b_ndebug = 'if-release'
+
+# Python module configuration
+python_path = '/usr/x86_64-w64-mingw32/bin/python3'
+
+# pkg-config paths
+pkg_config_libdir = ['/usr/x86_64-w64-mingw32/lib/pkgconfig', '/usr/x86_64-w64-mingw32/share/pkgconfig']
